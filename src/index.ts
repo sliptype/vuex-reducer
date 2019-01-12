@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex from 'vuex'
+import { MutationTree, Mutation} from 'vuex'
 
 export type Reducer<S> = (state: S, payload: any) => S
 
@@ -7,11 +7,11 @@ export interface ReducerTree<S> {
   [key: string]: Reducer<S>
 }
 
-export function reducers<S>(reducers: ReducerTree<S>): Vuex.MutationTree<S> {
+export function reducers<S>(reducers: ReducerTree<S>): MutationTree<S> {
   return mapValues(reducers, convertReducer)
 }
 
-function convertReducer<S>(reducer: Reducer<S>): Vuex.Mutation<S> {
+function convertReducer<S>(reducer: Reducer<S>): Mutation<S> {
   return (state, payload) => {
     const prevState = shallowClone(state)
     const nextState = reducer(prevState, payload)
@@ -19,10 +19,10 @@ function convertReducer<S>(reducer: Reducer<S>): Vuex.Mutation<S> {
 
     const res = compareState(prevState, nextState)
     res.set.forEach(key => {
-      Vue.set(state, key, (nextState as any)[key])
+      Vue.set((state as any), key, (nextState as any)[key])
     })
     res.delete.forEach(key => {
-      Vue.delete(state, key)
+      Vue.delete((state as any), key)
     })
   }
 }
